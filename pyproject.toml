@@ -18,3 +18,8 @@ appsec-kit = "appsec_kit.cli:run"
 
 [tool.hatch.build.targets.wheel]
 packages = ["appsec_kit"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

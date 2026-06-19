@@ -16,7 +16,7 @@ def write_configs(
     target: Path, lang: str, layers: list[str]
 ) -> list[tuple[str, str]]:
     results: list[tuple[str, str]] = []
-    ci_layers = [l for l in layers if l in _CI_LAYERS]
+    ci_layers = [l for l in layers if l in CI_LAYERS]
 
     if ci_layers:
         _write_workflow(target, lang, ci_layers, results)
