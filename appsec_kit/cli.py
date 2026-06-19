@@ -33,11 +33,11 @@ def _print_next_steps(lang: str, layers: list[str]) -> None:
     lines: list[str] = []
 
     if "precommit" in layers:
-        lines += [
-            "pip install pre-commit detect-secrets",
-            "detect-secrets scan > .secrets.baseline",
-            "pre-commit install",
-        ]
+        pip_pkgs = "pre-commit detect-secrets" if "secrets" in layers else "pre-commit"
+        lines.append(f"pip install {pip_pkgs}")
+        if "secrets" in layers:
+            lines.append("detect-secrets scan > .secrets.baseline")
+        lines.append("pre-commit install")
 
     if lang == "node" and "sast" in layers:
         lines += [
