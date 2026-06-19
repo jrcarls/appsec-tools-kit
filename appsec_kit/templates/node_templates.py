@@ -74,17 +74,19 @@ _SECRET_JOB = """\
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 """
 
-_PRECOMMIT_SECRETS = """\
+from ..versions import DETECT_SECRETS, GITLEAKS
+
+_PRECOMMIT_SECRETS = f"""\
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
+    rev: {DETECT_SECRETS}
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline"]
 """
 
-_PRECOMMIT_GITLEAKS = """\
+_PRECOMMIT_GITLEAKS = f"""\
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.22.1
+    rev: {GITLEAKS}
     hooks:
       - id: gitleaks
 """

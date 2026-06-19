@@ -6,7 +6,8 @@ from rich.console import Console
 from rich.panel import Panel
 
 from .detector import detect_project_type
-from .writer import print_next_steps, write_configs
+from .versions import CI_LAYERS
+from .writer import write_configs
 
 console = Console()
 
@@ -26,6 +27,46 @@ _STYLE = questionary.Style([
     ("selected", "fg:green"),
     ("instruction", "fg:default dim"),
 ])
+
+
+def _print_next_steps(lang: str, layers: list[str]) -> None:
+    lines: list[str] = []
+
+    if "precommit" in layers:
+        lines += [
+            "pip install pre-commit detect-secrets",
+            "detect-secrets scan > .secrets.baseline",
+            "pre-commit install",
+        ]
+
+    if lang == "node" and "sast" in layers:
+        lines += [
+            "",
+            "# SEMGREP_APP_TOKEN (free) removes API rate limits in CI:",
+            "# 1. Create account at https://semgrep.dev",
+            "# 2. Go to Settings → Tokens → Create token",
+            "# 3. Add to GitHub: Settings → Secrets → SEMGREP_APP_TOKEN",
+        ]
+
+    if any(layer in layers for layer in CI_LAYERS) or "precommit" in layers:
+        lines += [
+            "",
+            "# Commit and push to activate GitHub Actions:",
+            "git add .github/ .pre-commit-config.yaml",
+            'git commit -m "chore: add appsec security configuration"',
+            "git push",
+        ]
+
+    if lines:
+        text = "\n".join(
+            f"  {line}" if line and not line.startswith("#") else line for line in lines
+        )
+        console.print(Panel(
+            text,
+            title="[bold green]Next steps[/bold green]",
+            border_style="green",
+            padding=(0, 1),
+        ))
 
 
 def run() -> None:
@@ -91,4 +132,4 @@ def run() -> None:
         console.print(f"  [{color}]{icon}[/{color}]  {rel_path}  [dim]({status})[/dim]")
 
     console.print()
-    print_next_steps(console, lang, selected_layers)
+    _print_next_steps(lang, selected_layers)

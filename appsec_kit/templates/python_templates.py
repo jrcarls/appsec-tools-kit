@@ -72,26 +72,28 @@ _SECRET_JOB = """\
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 """
 
-_PRECOMMIT_SAST = """\
+from ..versions import BANDIT, DETECT_SECRETS, PIP_AUDIT
+
+_PRECOMMIT_SAST = f"""\
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.8.3
+    rev: {BANDIT}
     hooks:
       - id: bandit
         args: ["-c", "pyproject.toml"]
         exclude: ^tests/
 """
 
-_PRECOMMIT_SECRETS = """\
+_PRECOMMIT_SECRETS = f"""\
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
+    rev: {DETECT_SECRETS}
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline"]
 """
 
-_PRECOMMIT_DEPS = """\
+_PRECOMMIT_DEPS = f"""\
   - repo: https://github.com/pypa/pip-audit
-    rev: v2.7.3
+    rev: {PIP_AUDIT}
     hooks:
       - id: pip-audit
 """
