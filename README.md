@@ -234,6 +234,25 @@ pre-commit autoupdate
 
 ---
 
+## Mantendo as versões do kit atualizadas
+
+As versões das ferramentas (Bandit, Gitleaks, pip-audit, detect-secrets) são fixadas internamente no kit. Para atualizá-las para o latest antes de um novo release:
+
+```bash
+appsec-kit-bump
+```
+
+O comando consulta a GitHub Releases API de cada ferramenta, compara com as versões fixadas e atualiza automaticamente. Se alguma versão não puder ser obtida (sem internet, rate limit), o valor atual é mantido e um aviso é exibido.
+
+Após rodar, commite o resultado:
+
+```bash
+git add appsec_kit/versions.py
+git commit -m "chore: bump pinned tool versions"
+```
+
+---
+
 ## Ferramentas utilizadas
 
 | Ferramenta | Finalidade | Docs |
