@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 jobs:
 """
 
@@ -14,18 +17,30 @@ _SAST_JOB = """\
   sast:
     name: "SAST - Bandit"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install bandit[toml]
-      - run: bandit -r . -x ./tests,./venv,./.venv -f json -o bandit-report.json
+      - name: Run Bandit
+        id: bandit
+        run: bandit -r . -x ./tests,./venv,./.venv -ll -f sarif -o bandit.sarif
         continue-on-error: true
-      - uses: actions/upload-artifact@v4
+      - name: Upload findings to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
-          name: bandit-report
-          path: bandit-report.json
+          sarif_file: bandit.sarif
+          category: bandit
+      - name: Fail if findings found
+        if: steps.bandit.outcome == 'failure'
+        run: |
+          echo "Bandit found security issues (medium severity or above). Check the Security tab."
+          exit 1
 """
 
 _DEPS_JOB = """\
@@ -45,6 +60,9 @@ _SECRET_JOB = """\
   secret-scan:
     name: "Secret Scanning - Gitleaks"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
         with:

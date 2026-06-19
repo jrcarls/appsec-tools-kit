@@ -77,6 +77,15 @@ def print_next_steps(console: Console, lang: str, layers: list[str]) -> None:
             "pre-commit install",
         ]
 
+    if lang == "node" and "sast" in layers:
+        lines += [
+            "",
+            "# SEMGREP_APP_TOKEN (free) removes API rate limits in CI:",
+            "# 1. Create account at https://semgrep.dev",
+            "# 2. Go to Settings → Tokens → Create token",
+            "# 3. Add to GitHub: Settings → Secrets → SEMGREP_APP_TOKEN",
+        ]
+
     has_ci = any(l in layers for l in _CI_LAYERS)
     if has_ci or "precommit" in layers:
         lines += [

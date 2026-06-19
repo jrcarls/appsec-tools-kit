@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 jobs:
 """
 
@@ -14,13 +17,32 @@ _SAST_JOB = """\
   sast:
     name: "SAST - Semgrep"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - run: pip install semgrep
-      - run: semgrep --config=p/javascript --config=p/nodejs --config=p/typescript .
+      - name: Run Semgrep
+        id: semgrep
+        run: semgrep scan --config auto --sarif --output semgrep.sarif --error .
+        continue-on-error: true
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+      - name: Upload findings to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+      - name: Fail if findings found
+        if: steps.semgrep.outcome == 'failure'
+        run: |
+          echo "Semgrep found security issues. Check the Security tab."
+          exit 1
 """
 
 _DEPS_JOB = """\
@@ -40,6 +62,9 @@ _SECRET_JOB = """\
   secret-scan:
     name: "Secret Scanning - Gitleaks"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
         with:
