@@ -1,6 +1,6 @@
-BANDIT = "1.8.3"
+BANDIT = "1.9.4"
 DETECT_SECRETS = "v1.5.0"
-PIP_AUDIT = "v2.7.3"
-GITLEAKS = "v8.22.1"
+PIP_AUDIT = "v2.10.1"
+GITLEAKS = "v8.30.1"
 
 CI_LAYERS = frozenset(("sast", "deps", "secrets"))

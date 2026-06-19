@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 appsec-kit = "appsec_kit.cli:run"
+appsec-kit-bump = "appsec_kit.updater:bump_versions"
 
 [tool.hatch.build.targets.wheel]
 packages = ["appsec_kit"]
