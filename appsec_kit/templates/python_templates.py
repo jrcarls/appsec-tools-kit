@@ -1,3 +1,5 @@
+from ..versions import BANDIT, DETECT_SECRETS, PIP_AUDIT
+
 _WORKFLOW_HEADER = """\
 name: Security Scan
 
@@ -72,8 +74,6 @@ _SECRET_JOB = """\
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 """
 
-from ..versions import BANDIT, DETECT_SECRETS, PIP_AUDIT
-
 _PRECOMMIT_SAST = f"""\
   - repo: https://github.com/PyCQA/bandit
     rev: {BANDIT}
@@ -104,24 +104,24 @@ exclude_dirs = ["tests", "venv", ".venv"]
 skips = []
 """
 
+_WORKFLOW_JOBS: dict[str, str] = {
+    "sast": _SAST_JOB,
+    "deps": _DEPS_JOB,
+    "secrets": _SECRET_JOB,
+}
+
+_PRECOMMIT_HOOKS: dict[str, str] = {
+    "sast": _PRECOMMIT_SAST,
+    "secrets": _PRECOMMIT_SECRETS,
+    "deps": _PRECOMMIT_DEPS,
+}
+
 
 def build_python_workflow(layers: list[str]) -> str:
-    jobs: list[str] = []
-    if "sast" in layers:
-        jobs.append(_SAST_JOB)
-    if "deps" in layers:
-        jobs.append(_DEPS_JOB)
-    if "secrets" in layers:
-        jobs.append(_SECRET_JOB)
+    jobs = [_WORKFLOW_JOBS[layer] for layer in layers if layer in _WORKFLOW_JOBS]
     return _WORKFLOW_HEADER + "\n".join(jobs)
 
 
 def build_python_precommit_config(layers: list[str]) -> str:
-    hooks: list[str] = []
-    if "sast" in layers:
-        hooks.append(_PRECOMMIT_SAST)
-    if "secrets" in layers:
-        hooks.append(_PRECOMMIT_SECRETS)
-    if "deps" in layers:
-        hooks.append(_PRECOMMIT_DEPS)
+    hooks = [_PRECOMMIT_HOOKS[layer] for layer in layers if layer in _PRECOMMIT_HOOKS]
     return "repos:\n" + "".join(hooks) if hooks else "repos: []\n"
